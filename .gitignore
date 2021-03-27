@@ -1,4 +1,6 @@
+data*
 data/*png
 data/*pdf
 results/*png
 results/*pdf
+bm3d_matlab_package/*png
