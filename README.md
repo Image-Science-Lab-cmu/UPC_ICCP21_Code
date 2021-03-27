@@ -2,7 +2,7 @@
 
 This repository implements the experiment part of our paper "Design Display Pixel Layouts for Under-Panel Cameras", ICCP 2021, Anqi Yang and Aswin Sankaranarayanan. If you find our data and code useful, please cite our work.
 
-<img src="./images/CameraSchematic.png" width="200">
+<img src="./images/CameraSchematic.png" width="600">
 
 **Data**: All data captured by our lab prototype can be downloaded [here (3.2G)](https://drive.google.com/file/d/1De8eouvuwsy_EODPU9bW4TrxvT_aJQDy/view?usp=sharing). We provide three folders --- five display pixel patterns, pre-measured PSFs of each display layout, and RAW images under different display layouts.
 
