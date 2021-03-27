@@ -29,7 +29,7 @@ addpath bm3d_matlab_package/bm3d
 
 
 % TODO: specify scene folders under 'data/images/'
-sceneName = 'watercolor';
+sceneName = 'toy2';
 srcDir = sprintf('data/images/%s', sceneName);
 fprintf(['Deblurring for \"', sceneName, ...
     '\" under the following display layouts:\n\n']);
@@ -97,7 +97,7 @@ for id = 1: length(psfNames)
     lin_deblur_srgb = apply_cmatrix(lin_deblur, cam2rgb);
     
     
-    % - - - gamma correction - - -
+    % - - - gamma correction - - -    
     nl_blur = gamma_correction(single(lin_blur_srgb), offset, gamma, c);
     nl_deblur = gamma_correction(single(lin_deblur_srgb), offset, gamma, c);
     nl_psf = imread(['data/PSFs/', psfNames{id}, '.png']);
