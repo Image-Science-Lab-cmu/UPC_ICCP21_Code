@@ -1,4 +1,4 @@
-*png
-*pdf
-*data/
-*results/
+data/*png
+data/*pdf
+results/*png
+results/*pdf
