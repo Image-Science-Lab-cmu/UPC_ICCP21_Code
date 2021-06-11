@@ -2,7 +2,7 @@
 
 This repository implements the experiment part of our paper "Design Display Pixel Layouts for Under-Panel Cameras", ICCP 2021, Anqi Yang and Aswin Sankaranarayanan. If you find our data and code useful, please cite our work.
 
-![Under-Panel Camera Schematic](/images/CameraSchematic.pdf)
+<img src="./images/CameraSchematic.png" width="600">
 
 ### Evaluation
 
@@ -35,3 +35,4 @@ python optimize_display.py --tile_option repeat --area_gamma 10 --l2_gamma 10 --
 ```
 
 **Acknowledgement**: We use BM3D code from http://www.cs.tut.fi/~foi/GCF-BM3D/index.html#ref_software for image denoising. This work is/was supported by Global Research Outreach program of Samsung Advanced Institute of Technology.
+
