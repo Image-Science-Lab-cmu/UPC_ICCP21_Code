@@ -92,9 +92,16 @@ class Visualizer():
                 webpage.add_images(ims, txts, links, width=self.win_size)
             webpage.save()
 
-    # todo
     def plot_current_img(self, img, name, display_id=0):
         self.vis.image(img, caption=name, win=display_id)
+
+    def tensor_to_img(self, img_tensor):
+        if len(img_tensor.shape) > 3:
+            img = img_tensor[0, ...].numpy()
+        else:
+            img = img_tensor.numpy()
+        img = (img - np.amin(img)) / (np.amax(img) - np.amin(img))
+        return (255 * img).astype(np.uint8)
 
     # errors: dictionary of error labels and values
     def plot_current_errors(self, epoch, errors, display_id=4):
@@ -123,7 +130,7 @@ class Visualizer():
             win=display_id)
 
     def print_current_loss(self, batch_id, loss, logfile):
-        str = '%d/10000 ' % batch_id
+        str = '%d/150 ' % batch_id
         for key, value in loss.items():
             str += '%s=%.8f, ' % (key, value.numpy())
         print(str)

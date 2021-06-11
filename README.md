@@ -2,7 +2,9 @@
 
 This repository implements the experiment part of our paper "Design Display Pixel Layouts for Under-Panel Cameras", ICCP 2021, Anqi Yang and Aswin Sankaranarayanan. If you find our data and code useful, please cite our work.
 
-![Under-Panel Camera Schematic](./images/CameraSchematic.pdf=100x)
+![Under-Panel Camera Schematic](/images/CameraSchematic.pdf)
+
+### Evaluation
 
 **Data**: All data captured by our lab prototype can be downloaded [here (3.2G)](https://drive.google.com/file/d/1De8eouvuwsy_EODPU9bW4TrxvT_aJQDy/view?usp=sharing). We provide three folders --- five display pixel patterns, pre-measured PSFs of each display layout, and RAW images under different display layouts.
 
@@ -14,6 +16,22 @@ deblurReal.m
 **Simulation**: We implement simulated experiments by MATLAB. The script compares eight different display layouts under five different SNRs. The performance is measured by PSNR and SSIM between ground-truth image and recovered sharp image on this UDC [dataset](https://yzhouas.github.io/projects/UDC/udc.html).
 ```
 simulate.m
+```
+
+### Optimize per-pixel pattern
+
+**Configuration**: We use python 3.7 and Tensorflow2.0 for optimization. The easiest way to configure the environment is to use [Anaconda](https://docs.anaconda.com/anaconda/install/) and use the following steps.
+
+```
+cd optimize_display/
+conda env create --file tensorflow2.yml
+```
+
+**Training data**: As mentioned in the paper, we use a small image set [UDC](https://yzhouas.github.io/projects/UDC/udc.html) as our training dataset. If you are using this dataset, please download from their website. And change training set path in optimize_display.py to your path.
+
+**Optimization**: 
+```
+python optimize_display.py --tile_option repeat --area_gamma 10 --l2_gamma 10 --inv_gamma 0.01 --display_env VIS_NAME
 ```
 
 **Acknowledgement**: We use BM3D code from http://www.cs.tut.fi/~foi/GCF-BM3D/index.html#ref_software for image denoising. This work is/was supported by Global Research Outreach program of Samsung Advanced Institute of Technology.
