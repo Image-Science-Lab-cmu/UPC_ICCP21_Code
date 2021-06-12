@@ -2,7 +2,7 @@
 
 This repository implements the experiment part of our paper "Design Display Pixel Layouts for Under-Panel Cameras", ICCP 2021, Anqi Yang and Aswin Sankaranarayanan. If you find our data and code useful, please cite our work.
 
-(./images/CameraSchematic.pdf)
+<./images/CameraSchematic.pdf>
 
 ### Evaluation
 
