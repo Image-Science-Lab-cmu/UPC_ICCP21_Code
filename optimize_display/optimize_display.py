@@ -19,7 +19,7 @@ def load_data():
     img_width = 512
 
     # todo: change path to your training image directory
-    train_ds = tf.data.Dataset.list_files('../../HQ/train/*.png', shuffle=False)
+    train_ds = tf.data.Dataset.list_files('Train/Toled/HQ/*.png', shuffle=False)
     train_ds = train_ds.shuffle(240, reshuffle_each_iteration=True)
 
     AUTOTUNE = tf.data.experimental.AUTOTUNE
