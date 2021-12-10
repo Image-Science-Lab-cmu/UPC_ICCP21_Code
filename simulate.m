@@ -1,4 +1,4 @@
-function [] = mainComputePSF(patternIds, phaseOpt)
+function [] = simulate(patternIds)
 addpath utils
 addpath fig
 addpath bm3d_matlab_package/
@@ -7,26 +7,29 @@ addpath bm3d_matlab_package/bm3d
 
 
 srcDirs = {
-    'aperture_toled_single',
-    'aperture_toled_single',
+    'TOLED',                                    % TOLED Repeat
+    'TOLED',                                    % TOLED Random
     
-    '20201006-140308_Display_L2_Repeat',  % top10 L2 (thres: 0.45)
-    '20201006-153518_Display_L2Inv_Repeat',  % top10 L2 + invertible
+    'L2_Repeat',                                % L2 Repeat
+    'L2Inv_Repeat',                             % L2Inv Repeat
     
-	'20201125-031442_Display_L2_Random',         % L2 random rotate
-    '20201125-145433_Display_L2Inv_Random',         % 8. L2+inv random rotate        
+	'L2_Random',                                % L2 Random
+    'L2Inv_Random',                             % L2Inv Random
     };
 
 dstDirs = { 
     
-    'aperture_toled_single',
-    'aperture_toled_randomRot90',
+    'aperture_toled_single',                    % TOLED Repeat
+    'aperture_toled_randomRot90',               % TOLED Random
     
-    '20201006-140308_Display_L2_Repeat',  % top10 L2 (thres: 0.45)
-    '20201006-153518_Display_L2Inv_Repeat',  % top10 L2 + invertible
+    'aperture_poled_single',                    % POLED Repeat
+    'aperture_poled_randomRot90',               % POLED Random
     
-	'20201125-031442_Display_L2_Random',         % L2 random rotate
-    '20201125-145433_Display_L2Inv_Random',         % 8. L2+inv random rotate
+    '20201006-140308_Display_L2_Repeat',        % L2 Repeat
+    '20201006-153518_Display_L2Inv_Repeat',     % L2Inv Repeat
+    
+	'20201125-031442_Display_L2_Random',        % L2 Random
+    '20201125-145433_Display_L2Inv_Random',     % L2Inv Random
       
 };
 tileOptions = {'', 'randomRot90', ...
@@ -36,7 +39,9 @@ tileOptions = {'', 'randomRot90', ...
 thresholds =   [ 0, 0,...
                  0, 0, ...
                  0, 0];
-area = [0.20, 0.25, 0.20, 0.33,];
+if ~exist('patternIds', 'var')
+    patternIds = 1: length(dstDirs);
+end
 
 SNRs = 24:4:40;
 Ls = [273, 654, 1608, 4005, 10024];
@@ -45,24 +50,26 @@ pixelSize = 2e-6;
 ssims = zeros(1, length(SNRs));
 psnrs = zeros(1, length(SNRs));
 
-ratio=0.3;
-scores=[];
+
 for id = patternIds
      
     fprintf('\n\n- - - - - - - - - -\n');
     dstDir = sprintf('results/simulation/%s/', dstDirs{id});
     mkdir(dstDir);
     
-    % in this script, we only test of DPI=150
-    unitPatternSize = 168e-6;
-    delta1 = 8e-6;  % ICCP21
-%     todo
-%     delta1 = 4e-6;    % @Feb 20   
+    % in this script, we only test DPI=150
+    unitPatternSize = 168e-6;       % Size of unit display pattern [m]
+    delta1 = 8e-6;                  % Sample spacing on lens plane [m]
+    % delta1 = 4e-6;                % Sample spacing on lens plane [m]
 
-    % todo:
-    [PSFs, openRatio] = computePSF_3(h1, phaseOpt, srcDirs{id}, dstDir, ...
-                    tileOptions{id}, thresholds(id), ...
-                    unitPatternSize, delta1); 
+    % Note: 
+    % computePSF_3       --- computes PSF of peak wavelengths for RGB channel.
+    %                        We use this function in simualtion evaluation.
+    % computePSF_3smooth --- computes multi-wavelength PSF for RGB channel
+    %                        To reproduce PSFs in Figure 5, please use 
+    %                        this version.
+    [PSFs, openRatio] = computePSF_3(srcDirs{id}, dstDir, ...
+        tileOptions{id}, thresholds(id), unitPatternSize, delta1); 
     refRatio = 0.2072;
     kernels = PSFs;
     
@@ -88,8 +95,8 @@ for id = patternIds
     imagesc(PSFs_x, PSFs_y, log(abs(K)+1));colormap jet; colorbar;
 %     saveas(gcf, sprintf('%s/%s_Autocorrelation.png', dstDir, phaseOpt));   
     hold off
-  
-   
+    
+    % Evaluate PSF on images
     for noiseId = 1: length(SNRs)
         
 
