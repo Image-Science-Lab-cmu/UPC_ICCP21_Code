@@ -1,17 +1,11 @@
-function [psf, openRatio] = computePSF_3smooth(srcPath, dstDir, option, threshold, unitPatternSize, delta1)
-
-% This function compute PSF for RGB sensor channels.
-% For each channel, we compute a weighted sum of 
-% mulitple wavelength.
-
+function [psf, openRatio] = computePSF_3smooth(h1, phaseOpt, srcDir, dstDir, option, threshold, unitPatternSize, delta1)
 
 % optical system parameters
 % simulation parameters in UDC paper
 % f = 0.01;                    % camera focal length [m]
 % D1 = 4e-3;                   % diam of lens aperture [m]
 
-% Note: To generate PSF in Figure 5, 
-% please use the following f and D1.
+% Note: To generate PSF in Figure 5, please use the following f and D1.
 % Huawei P30 camera
 f = 5.56e-3;                % camera focal length [m]
 D1 = f/1.6;                 % diam of lens aperture [m]
@@ -36,11 +30,12 @@ x1 = (-maxM/2: maxM/2-1) * delta1;
 u1 = circ(X1/(D1), Y1/(D1));
 
 % Initialize display pattern
-if ~exist(srcPath, 'file')
-    error('Pixel pattern does not exist.');
+if exist(sprintf('data/pixelPatterns/%s.png', srcDir))
+    path = sprintf('data/pixelPatterns/%s.png', srcDir);
+else
+    print('Pixel pattern does not exist.'); return;
 end
 display = load_aperture(path, maxM*delta1, D1, maxM, unitPatternSize, option, threshold);
-openRatio = mean(display(:));
 
 u1 = u1 .* display;
 I1 = abs(u1.^2);                           % src irradiance
@@ -94,16 +89,40 @@ u2 = cat(3, u2_R, ...
             u2_G, ...
             u2_B);
 psf = u2;
+% psf=abs(u2);
+% psf=psf.^2;
+
+% mid = floor(size(psf, 1)/2);
+% figure,
+% plot(log(psf(mid, :, 2)));
+% ylim([-25, 15]);
 
 % - - - downsample psf to fit sensor pitch - - -
 r=floor(pixelSize/delta2);
 psf = imfilter(psf, ones(r,r)/r^2);
 psf = psf(1:r:end, 1:r:end, :);
 
+% - - - save display pattern - - -
+pattern = display(1:100, 1:100);
+imwrite(pattern, sprintf('%s/display_pattern_binary.png', dstDir));
+
+% - - - compute the sharpness of psf - - -
+m = (size(psf, 1) - 1)/2;
+n = (size(psf, 2) - 1)/2;
+[X, Y] = meshgrid(-m:m, -n:n);
+sigma=2;
+gauss = exp(-(X.^2+Y.^2)/2/sigma^2);
+gauss = gauss / sum(gauss(:));
+
 % - - - normalize PSF - - - 
 for cc = 1:3
     psf(:,:,cc) = psf(:,:,cc) / sum(sum(psf(:,:,cc)));
 end
+
+imgpsf=mean(psf, 3);
+sharpness=sum(sum((imgpsf .* gauss)));
+openRatio = mean(round(display(:)));
+fprintf('open area=%.4f, sharpness=%.8f\n', openRatio, sharpness);
 
 return;
     

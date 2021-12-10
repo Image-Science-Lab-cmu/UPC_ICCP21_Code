@@ -5,9 +5,8 @@ addpath bm3d_matlab_package/
 addpath bm3d_matlab_package/bm3d
 % clear;close all;clc;
 
-% \PATH\TO\PIXELPATTERNS
-srcDir = 'data/pixelPatterns/';
-patternNames = {
+
+srcDirs = {
     'TOLED',                                    % TOLED Repeat
     'TOLED',                                    % TOLED Random
     
@@ -20,14 +19,17 @@ patternNames = {
 
 dstDirs = { 
     
-    'TOLED_Repeat',                             % TOLED Repeat
-    'TOLED_Random',                             % TOLED Random
+    'aperture_toled_single',                    % TOLED Repeat
+    'aperture_toled_randomRot90',               % TOLED Random
     
-    'L2_Repeat',                                % L2 Repeat
-    'L2Inv_Repeat',                             % L2Inv Repeat
+    'aperture_poled_single',                    % POLED Repeat
+    'aperture_poled_randomRot90',               % POLED Random
     
-	'L2_Random',                                % L2 Random
-    'L2Inv_Random',                             % L2Inv Random
+    '20201006-140308_Display_L2_Repeat',        % L2 Repeat
+    '20201006-153518_Display_L2Inv_Repeat',     % L2Inv Repeat
+    
+	'20201125-031442_Display_L2_Random',        % L2 Random
+    '20201125-145433_Display_L2Inv_Random',     % L2Inv Random
       
 };
 tileOptions = {'', 'randomRot90', ...
@@ -54,20 +56,19 @@ for id = patternIds
     fprintf('\n\n- - - - - - - - - -\n');
     dstDir = sprintf('results/simulation/%s/', dstDirs{id});
     mkdir(dstDir);
-    srcPath = [srcDir, patternNames{id}, '.png']; % path to display pattern
     
     % in this script, we only test DPI=150
-    unitPatternSize = 168e-6;       % Size of unit display pattern [m]
-    delta1 = 8e-6;                  % Sample spacing on lens plane [m]
-    % delta1 = 4e-6;                % Sample spacing on lens plane [m]
+    unitPatternSize = 168e-6;       % 
+    delta1 = 8e-6;  % ICCP21
+%     delta1 = 4e-6;  % ICCP21
 
     % Note: 
     % computePSF_3       --- computes PSF of peak wavelengths for RGB channel.
     %                        We use this function in simualtion evaluation.
-    % computePSF_3smooth --- computes multi-wavelength PSF for RGB channel
-    %                        To reproduce PSFs in Figure 5, please use 
-    %                        this version.
-    [PSFs, openRatio] = computePSF_3(srcPath, dstDir, ...
+    % computePSF_3smooth --- computes PSF of multi-wavelengths for RGB
+    %                        channel. To reproduce PSFs in Figure 5, please
+    %                        use this version.
+    [PSFs, openRatio] = computePSF_3(srcDirs{id}, dstDir, ...
         tileOptions{id}, thresholds(id), unitPatternSize, delta1); 
     refRatio = 0.2072;
     kernels = PSFs;
