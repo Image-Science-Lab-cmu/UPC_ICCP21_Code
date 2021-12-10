@@ -39,7 +39,8 @@ u1 = circ(X1/(D1), Y1/(D1));
 if ~exist(srcPath, 'file')
     error('Pixel pattern does not exist.');
 end
-display = load_aperture(path, maxM*delta1, D1, maxM, unitPatternSize, option, threshold);
+display = load_aperture(srcPath, maxM*delta1, D1, maxM, ...
+                unitPatternSize, option, threshold);
 openRatio = mean(display(:));
 
 u1 = u1 .* display;

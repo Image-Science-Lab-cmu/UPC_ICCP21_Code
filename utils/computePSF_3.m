@@ -29,7 +29,8 @@ u1 = circ(X1/(D1), Y1/(D1));
 if ~exist(srcPath, 'file')
     error('Pixel pattern does not exist.');
 end
-display = load_aperture(path, M_R*delta1, D1, M_R, unitPatternSize, option, threshold);
+display = load_aperture(srcPath, M_R*delta1, D1, M_R, ...
+            unitPatternSize, option, threshold);
 u1 = u1 .* display;
 
 % height map of phase mask (all zeros)
@@ -83,7 +84,7 @@ pattern = display(1:N, 1:N);
 imwrite(pattern, sprintf('%s/display_pattern_binary.png', dstDir));
 
 openRatio = mean(round(display(:)));
-fprintf('%s: Open ratio=%.4f\n', srcDir, openRatio);
+fprintf('%s: Open ratio=%.4f\n', srcPath, openRatio);
 
 %% visualize MTF
 colors=[1,0,0; 0,1,0; 0,0,1];

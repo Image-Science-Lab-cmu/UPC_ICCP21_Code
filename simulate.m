@@ -67,7 +67,7 @@ for id = patternIds
     % computePSF_3smooth --- computes multi-wavelength PSF for RGB channel
     %                        To reproduce PSFs in Figure 5, please use 
     %                        this version.
-    [PSFs, openRatio] = computePSF_3(srcPath, dstDir, ...
+    [PSFs, openRatio] = computePSF_3smooth(srcPath, dstDir, ...
         tileOptions{id}, thresholds(id), unitPatternSize, delta1); 
     refRatio = 0.2072;
     kernels = PSFs;
@@ -94,6 +94,8 @@ for id = patternIds
     imagesc(PSFs_x, PSFs_y, log(abs(K)+1));colormap jet; colorbar;
 %     saveas(gcf, sprintf('%s/%s_Autocorrelation.png', dstDir, phaseOpt));   
     hold off
+
+    continue;
     
     % Evaluate PSF on images
     for noiseId = 1: length(SNRs)
