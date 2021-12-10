@@ -1,19 +1,16 @@
-function [psf, openRatio] = computePSF_3(h1, phaseOpt, srcDir, dstDir, option, threshold, unitPatternSize, delta1)
+function [psf, openRatio] = computePSF_3(srcDir, dstDir, option, threshold, unitPatternSize, delta1)
+% This function compute PSF of RGB channel
+% using only peak wavelength.
+% 
+%
 % optical system parameters
-% D1 = 4e-3;                  % diam of the lens/disp aperture [m]
-% todo
-f = 0.01;
-D1 = 4e-3;
-% D1 =0.0033;
-wvl_R=0.61e-6;           % wavelength
-wvl_G=0.53e-6;
-wvl_B=0.47e-6;
-% unitPatternSize = 168e-6;
+% used in simulation experiments
+f = 0.01;                     % camera focal length [m]
+D1 = 4e-3;                    % diam of the lens/disp aperture [m]
 
-% k=2*pi/(lambda);              % wavenumber
-% todo: 0.01 is current simulation
-% f=0.01;                      % focal length (m)
-% f=0.006;                      % focal length (m)
+wvl_R=0.61e-6;                % peak wavelength of R channel
+wvl_G=0.53e-6;                % peak wavelength of G channel
+wvl_B=0.47e-6;                % peak wavelength of B channel
 
 delta2 = 0.5e-6;              % diam of the lens aperture [m]
 M_R = floor(wvl_R*f/delta1/delta2/2)*2; % number of samples
@@ -28,50 +25,18 @@ x1 = (-M_R/2: M_R/2-1) * delta1;
 % u1 = rect(X1/(D1)) .* rect(Y1/(D1));  % src field
 u1 = circ(X1/(D1), Y1/(D1));
 
-% add window to aperture
-% [xs, ys, ~] = find(u1);
-% xmin = min(xs); xmax = max(xs);
-% ymin = min(ys); ymax = max(ys);
-% wx = tukeywin(xmax-xmin+1, cc);
-% wy = tukeywin(ymax-ymin+1, cc);
-% win = wx * wy';
-% win = win / max(win(:));
-% u1(xmin:xmax, ymin:ymax) = win;
 
 % init display pattern
-if exist(sprintf('fig/%s/display_pattern_refined.png', srcDir))
-    path = sprintf('fig/%s/display_pattern_refined.png', srcDir);
-elseif exist(sprintf('fig/%s/display_pattern_refined.mat', srcDir))
-    path = sprintf('fig/%s/display_pattern_refined.mat', srcDir);
-else    
-    path = sprintf('fig/%s/display_pattern.png', srcDir);
+if exist(sprintf('data/pixelPatterns/%s.png', srcDir))
+    path = sprintf('data/pixelPatterns/%s.png', srcDir);
+else
+    print('Pixel pattern does not exist.'); return;
 end
 display = load_aperture(path, M_R*delta1, D1, M_R, unitPatternSize, option, threshold);
 u1 = u1 .* display;
 
-% apply phase modulation
-if strcmp(phaseOpt, 'random')
-    h1 = h1(1:size(u1,1), 1:size(u1,2));
-    Phi = k*(1.4-1)*h1;                    % phase profile
-    u1 = u1 .* exp(i*Phi);                 % phase modulated field
-elseif strcmp(phaseOpt, 'learn')
-    load(sprintf('fig/%s/height_map.mat', srcDir));
-    load(sprintf('fig/%s/u1.mat', srcDir));
-    
-    h1 = h1 - min(h1(:));
-    
-    figure, hold on; axis equal, axis tight;
-    imagesc(h1);
-    colormap jet; colorbar;
-    saveas(gcf, sprintf('%s/height_map.png', dstDir));
-    hold off;
-    
-    imwrite(u1, sprintf('%s/u1.png', dstDir))
-   
-else
-%     load(sprintf('fig/%s/u1.mat', srcDir));
-    h1 = zeros(size(u1));
-end
+% height map of phase mask (all zeros)
+h1 = zeros(size(u1));
 
 I1 = abs(u1.^2);                           % src irradiance
 figure,imshow(I1,[]);
@@ -104,52 +69,26 @@ u2 = cat(3, u2_R(crop_R+1:end-crop_R, crop_R+1:end-crop_R), ...
 psf=abs(u2);
 psf=psf.^2;
 
-% downsample psf
+% downsample psf to fit sensor pitch
 r=4;
 psf = imfilter(psf, ones(r,r)/r^2);
 psf = psf(1:r:end, 1:r:end, :);
 
-%% alternative
-% r = 4;
-% u2_R = downSample(abs(u2_R) .^ 2, r);
-% u2_G = downSample(abs(u2_G) .^ 2, r);
-% u2_B = downSample(abs(u2_B) .^ 2, r);
-% 
-% crop_R = floor((size(u2_R, 1) - size(u2_B, 1))/2);
-% crop_G = floor((size(u2_G, 1) - size(u2_B, 1))/2);
-% 
-% psf = cat(3, u2_R(crop_R+1:end-crop_R, crop_R+1:end-crop_R), ...
-%             u2_G(crop_G+1:end-crop_G, crop_G+1:end-crop_G), ...
-%             u2_B);
-
-%%
-% save display pattern
-L = 800e-6;
-N = floor(L/delta1);
-pattern = display(1:N, 1:N);
-imwrite(pattern, sprintf('%s/display_pattern_binary.png', dstDir));
-%compute the sharpness of psf
-m = (size(psf, 1) - 1)/2;
-n = (size(psf, 2) - 1)/2;
-[X, Y] = meshgrid(-m:m, -n:n);
-sigma=2;
-gauss = exp(-(X.^2+Y.^2)/2/sigma^2);
-gauss = gauss / sum(gauss(:));
-
+% normalize PSF
 for cc = 1:3
     psf(:,:,cc) = psf(:,:,cc) / sum(sum(psf(:,:,cc)));
 end
 
-imgpsf=mean(psf, 3);
-% imgpsf=imgpsf / sum(imgpsf(:));
-sharpness=sum(sum((imgpsf .* gauss)));
-invertible = min(psf(:));
-variance = compute_var(psf);
+%% save tiled display pattern
+L = 800e-6;
+N = floor(L/delta1);
+pattern = display(1:N, 1:N);
+imwrite(pattern, sprintf('%s/display_pattern_binary.png', dstDir));
+
 openRatio = mean(round(display(:)));
-fprintf('open area=%.4f, sharpness=%.8f std=%.4f\n', openRatio, sharpness, sqrt(variance));
-% fprintf('open area=%.4f, invertible=%.8f\n', mean(display(:)), invertible);
+fprintf('%s: Open ratio=%.4f\n', srcDir, openRatio);
 
-
+%% visualize MTF
 colors=[1,0,0; 0,1,0; 0,0,1];
 close all;
 % figure(3), clf(figure(3), 'reset');hold on
@@ -203,16 +142,3 @@ figure(2), hold on; saveas(gcf, sprintf('%s/mtf_horizontal.pdf', dstDir)); hold 
 figure(3), hold on; saveas(gcf, sprintf('%s/mtf_diagonal.pdf', dstDir)); hold off;
 save(sprintf('%s/mtf_radial.mat', dstDir), 'mtf_radial_avgs', 'mtf_radial_mins');
 
-% load color display
-% if exist(sprintf('fig/%s/display_pattern_rgb.png', srcDir))
-%     path = sprintf('fig/%s/display_pattern_rgb.png', srcDir);
-%     display = load_display(path, M_R*delta1, D1, M_R, unitPatternSize, option, threshold);
-%     imwrite(display(1:126,1:126,:), sprintf('%s/display_pattern_rgb.png', dstDir));
-%     figure,imshow(display(1:126,1:126,:));
-%     
-%     path = sprintf('fig/%s/display_pattern_rgb_only.png', srcDir);
-%     display = load_display(path, M_R*delta1, D1, M_R, unitPatternSize, option, threshold);
-%     imwrite(display(1:126,1:126,:), sprintf('%s/display_pattern_rgb_only.png', dstDir));
-%     figure,imshow(display(1:126,1:126,:));
-%     
-% end

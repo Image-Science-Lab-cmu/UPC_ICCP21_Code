@@ -1,6 +1,7 @@
 data*
 data/*png
 data/*pdf
+data/pixelPatterns/TOLED_*png
 results/*png
 results/*pdf
 *png
