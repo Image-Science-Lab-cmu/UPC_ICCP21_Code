@@ -67,7 +67,7 @@ for id = patternIds
     % computePSF_3smooth --- computes multi-wavelength PSF for RGB channel
     %                        To reproduce PSFs in Figure 5, please use 
     %                        this version.
-    [PSFs, openRatio] = computePSF_3smooth(srcPath, dstDir, ...
+    [PSFs, openRatio] = computePSF_3(srcPath, dstDir, ...
         tileOptions{id}, thresholds(id), unitPatternSize, delta1); 
     refRatio = 0.2072;
     kernels = PSFs;
