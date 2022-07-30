@@ -6,7 +6,7 @@ This repository implements the experiment part of our paper "Design Display Pixe
 
 ### Evaluation
 
-**Data**: All data captured by our lab prototype can be downloaded [here (3.2G)](https://drive.google.com/drive/folders/14LIYzJeMNMEMwnlv85002S7lWnvCHf6v?usp=sharing). We provide three folders --- five display pixel patterns, pre-measured PSFs of each display layout, and RAW images under different display layouts.
+**Data**: All data captured by our lab prototype can be downloaded [here (3.2G)](https://drive.google.com/file/d/1zzKODvbaS7Mw32Pi6bhW5qp2i4j9STgS/view?usp=sharing). We provide three folders --- five display pixel patterns, pre-measured PSFs of each display layout, and RAW images under different display layouts.
 
 **Process RAW images**: We provide MATLAB script to process the captured RAW data and recover sharp images. The script traverses and processes RAW images of the same scene captured under various display layouts. Please edit the name of the scene in the script. For each RAW image, we process it following five steps: (1) demosaick RAW image (2) downsample demosaicked image to 1k (3) denoise (4) Wiener deblurring (5) color and gamma correction.
 ```
