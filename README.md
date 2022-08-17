@@ -13,7 +13,7 @@ This repository implements the experiment part of our paper "Design Display Pixe
 deblurReal.m
 ```
 
-**Simulation**: We implement simulated experiments by MATLAB. The script compares eight different display layouts under five different SNRs. The performance is measured by PSNR and SSIM between ground-truth image and recovered sharp image on this UDC [dataset](https://yzhouas.github.io/projects/UDC/udc.html).
+**Simulation**: We implement simulated experiments by MATLAB. The script compares eight different display layouts under five different SNRs. The performance is measured by PSNR and SSIM between ground-truth image and recovered sharp image on this UDC [dataset](https://yzhouas.github.io/projects/UDC/udc.html). You can also download the images we used from [here](https://drive.google.com/file/d/1BuRzeFdPueT7rGIMLCswftx-UjNMvCWr/view?usp=sharing)
 ```
 simulate.m
 ```
