@@ -117,17 +117,24 @@ for id = patternIds
             fprintf('%s SNR=%d imId=%d...\n', dstDir, SNR, imId);
             
             % - - - read image - - -
-            img = im2double(imread(sprintf('fig/HQ/test/%02d.png', imId)));
+	    % TODO: we conduct evaluation on thirty ground-truth 
+            % sharp images UDC dataset.
+            % https://yzhouas.github.io/projects/UDC/udc.html
+            % You can also download the images we used from here:
+            % https://drive.google.com/file/d/1BuRzeFdPueT7rGIMLCswftx-UjNMvCWr/view?usp=sharing
+            UDC_DATASET_VAL = 'data/simulation_test';
+            img = im2double(imread(sprintf('%s/%02d.png', UDC_DATASET_VAL, imId)));
             img = img ./ max(img(:)); % normalize img to [0,1]
             img = img .* (openRatio / refRatio);
           
-
             % ================================================= %
             %  Simulate capturing an image under display panel  %
             % ================================================= %
             
             % blur sharp image by PSF
-            imgBlur = myConv2(img, kernels);
+            for cc = 1: 3
+                imgBlur(:,:,cc) = myConv2(img(:,:,cc), kernels(:,:,cc), 'same');
+            end
             
             % add read out and shot noise
             imgBlurNoisy = add_noise(imgBlur * L, 1, sensor);
@@ -148,7 +155,7 @@ for id = patternIds
             noise_type =  'gw';
             noise_var = noise_vars(noiseId); % Noise variance
             seed = 0; % seed for pseudorandom noise realization
-            [~, PSD, ~] = getExperimentNoise(noise_type, noise_var, seed, size(imgBlurnoisy));
+            [~, PSD, ~] = getExperimentNoise(noise_type, noise_var, seed, size(imgBlurNoisy));
             imgBlurDenoised = CBM3D(imgBlurNoisy, PSD, noiseProfile);
 
             % wiener deconvolution
